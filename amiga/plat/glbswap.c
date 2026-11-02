@@ -33,8 +33,34 @@ static void swap_swd(BYTE *p, unsigned size)
 	swn32(p, 8); swn32(p + 8 * 4 + 32, 14);
 	DWORD fldofs = *(DWORD *)(p + 8 * 4 + 32 + 3 * 4), numflds = *(DWORD *)(p + 8 * 4 + 32 + 8 * 4);
 	for (DWORD i = 0; i < numflds; i++) {
-		BYTE *f = p + fldofs + i * 144; if (f + 144 > p + size) break;
-		swn32(f, 8); swn32(f + 32 + 32, 1); swn32(f + 32 + 32 + 4 + 16, 15);
+		BYTE *f = p + fldofs + i * 148; if (f + 148 > p + size) break;
+		swn32(f, 8); swn32(f + 32 + 32, 1); swn32(f + 32 + 32 + 4 + 16, 16);
+	}
+}
+
+/* AGX: stream of ANIMLINE records {opt,fill,offset,length: u16 each} + length data bytes, ended by a record with opt == 0.
+   The first frame of a movie has one extra leading fill byte; the layout that ends exactly at the item size is the right one. */
+static int agx_walk(const BYTE *p, unsigned size, unsigned start)
+{
+	unsigned pos = start;
+	for (;;) {
+		if (pos + 8 > size) return -1;
+		unsigned opt = p[pos] | (p[pos + 1] << 8);
+		if (opt == 0) return (int)(pos + 8);
+		pos += 8 + (p[pos + 6] | (p[pos + 7] << 8));
+	}
+}
+static void swap_agx(BYTE *p, unsigned size)
+{
+	unsigned start = 0;
+	if (agx_walk(p, size, 0) != (int)size && agx_walk(p, size, 1) == (int)size) start = 1;
+	if (agx_walk(p, size, start) < 0) return;
+	unsigned pos = start;
+	for (;;) {
+		unsigned opt = p[pos] | (p[pos + 1] << 8), len = p[pos + 6] | (p[pos + 7] << 8);
+		sw16(p + pos); sw16(p + pos + 2); sw16(p + pos + 4); sw16(p + pos + 6);
+		if (opt == 0) break;
+		pos += 8 + len;
 	}
 }
 
@@ -47,6 +73,7 @@ void GLB_SwapItem(const char *rawname, BYTE *p, unsigned size)
 	for (int k = 0; k < i; k++) if (name[k] == '_') suf = name + k + 1;
 	if (suf && (!strcmp3(suf, "PIC") || !strcmp3(suf, "BLK"))) { swap_pic(p, size); return; }
 	if (suf && !strcmp3(suf, "FNT")) { swap_fnt(p, size); return; }
+	if (suf && !strcmp3(suf, "AGX")) { swap_agx(p, size); return; }
 	if (suf && !strcmp3(suf, "SWD")) { swap_swd(p, size); return; }
 	if (!suf && size >= 20) {            /* unnamed run (e.g. tile pictures): detect GFX_PIC by header */
 		DWORD t = ld32(p), w = ld32(p + 12), h = ld32(p + 16);

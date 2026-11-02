@@ -5,7 +5,7 @@ CC      := $(PREFIX)gcc
 SRC     := build/src
 OBJ     := build/obj
 CFLAGS  := -x c -m68020 -malign-int -funsigned-char -fno-stack-protector -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -D__NO_CTYPE $(OPT) -w -std=gnu89 \
-           -fno-pic -fno-pie -ffreestanding -fno-builtin -Ishim -I$(SRC) -Iplat -D__cdecl= -D__far= -D__near= -D__interrupt= -DO_BINARY=0 -D_MAX_PATH=260 -include errno.h -DAMIGA
+           -fno-pic -fno-pie -ffreestanding -fno-builtin -Ishim -I$(SRC) -Iplat -D__cdecl= -D__far= -D__near= -D__interrupt= -DO_BINARY=0 -D_MAX_PATH=260 -include errno.h -DAMIGA $(EXTRA)
 GAME    := anims bonus enemy eshot flame fx help input intro loadsave movie objects shadows shots store tile windows rap \
            vmemapi prefapi ptrapi gfxapi exitapi glbapi imsapi kbdapi swdapi
 PLAT    := libc video tsm dosemu asm stubs main glbswap

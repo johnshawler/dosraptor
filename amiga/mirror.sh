@@ -69,3 +69,14 @@ s=open('glbapi.c').read()
 open('glbapi.c','w').write(s)
 PY
 cd ../..
+cd build/src
+python3 - <<'PY'
+s=open('glbapi.c').read()
+s=s.replace("	return GLB_FetchItem( handle, FI_LOCK );","	if ( TRACE_GLB ) printf(\"LOCK %08x ra=%x self=%x\\n\", handle, (unsigned)__builtin_return_address(0), (unsigned)GLB_LockItem);\n	return GLB_FetchItem( handle, FI_LOCK );")
+for fn,mode in (("GLB_CacheItem","FI_CACHE"),("GLB_GetItem","FI_DISCARD")):
+    s=s.replace("	return GLB_FetchItem( handle, %s );"%mode,"	if ( handle == ~0 ) printf(\"EMPTY %s ra=%%x self=%%x\\n\", (unsigned)__builtin_return_address(0), (unsigned)%s);\n	return GLB_FetchItem( handle, %s );"%(fn,fn,mode))
+s=s.replace("	if ( TRACE_GLB ) printf(","	if ( handle == ~0 ) printf(\"EMPTY GLB_LockItem ra=%x self=%x\\n\", (unsigned)__builtin_return_address(0), (unsigned)GLB_LockItem);\n	if ( TRACE_GLB ) printf(")
+s=s.replace("#define _SCOTTGAME","#define _SCOTTGAME\n#ifndef TRACE_GLB\n#define TRACE_GLB 0\n#endif")
+open('glbapi.c','w').write(s)
+PY
+cd ../..
