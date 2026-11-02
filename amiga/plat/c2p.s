@@ -1,0 +1,96 @@
+| c2p.s - chunky -> 8 interleaved bitplanes (plane stride 40 bytes, 16 pixels per call).  Kernel derived from the Zoo Keeper A1200 port.
+	.text
+	.even
+	.globl c2p_pair
+.Lkern:
+	move.l 12(%a0),%d0
+	move.l 8(%a0),%d1
+	move.l 4(%a0),%d2
+	move.l (%a0),%d3
+	move.l %d0,%d4
+	lsr.l #8,%d4
+	eor.l %d2,%d4
+	and.l #0x00FF00FF,%d4
+	eor.l %d4,%d2
+	lsl.l #8,%d4
+	eor.l %d4,%d0
+	move.l %d1,%d4
+	lsr.l #8,%d4
+	eor.l %d3,%d4
+	and.l #0x00FF00FF,%d4
+	eor.l %d4,%d3
+	lsl.l #8,%d4
+	eor.l %d4,%d1
+	move.l %d0,%d4
+	lsr.l #4,%d4
+	eor.l %d1,%d4
+	and.l #0x0F0F0F0F,%d4
+	eor.l %d4,%d1
+	lsl.l #4,%d4
+	eor.l %d4,%d0
+	move.l %d2,%d4
+	lsr.l #4,%d4
+	eor.l %d3,%d4
+	and.l #0x0F0F0F0F,%d4
+	eor.l %d4,%d3
+	lsl.l #4,%d4
+	eor.l %d4,%d2
+	swap %d0
+	move.w %d0,%d4
+	move.w %d1,%d0
+	swap %d0
+	move.w %d4,%d1
+	swap %d2
+	move.w %d2,%d4
+	move.w %d3,%d2
+	swap %d2
+	move.w %d4,%d3
+	move.l %d0,%d4
+	lsr.l #2,%d4
+	eor.l %d1,%d4
+	and.l #0x33333333,%d4
+	eor.l %d4,%d1
+	lsl.l #2,%d4
+	eor.l %d4,%d0
+	move.l %d2,%d4
+	lsr.l #2,%d4
+	eor.l %d3,%d4
+	and.l #0x33333333,%d4
+	eor.l %d4,%d3
+	lsl.l #2,%d4
+	eor.l %d4,%d2
+	move.l %d0,%d4
+	lsr.l #1,%d4
+	eor.l %d2,%d4
+	and.l #0x55555555,%d4
+	eor.l %d4,%d2
+	lsl.l #1,%d4
+	eor.l %d4,%d0
+	move.l %d1,%d4
+	lsr.l #1,%d4
+	eor.l %d3,%d4
+	and.l #0x55555555,%d4
+	eor.l %d4,%d3
+	lsl.l #1,%d4
+	eor.l %d4,%d1
+	move.w %d0,0(%a1)
+	swap %d0
+	move.w %d0,160(%a1)
+	move.w %d1,80(%a1)
+	swap %d1
+	move.w %d1,240(%a1)
+	move.w %d2,40(%a1)
+	swap %d2
+	move.w %d2,200(%a1)
+	move.w %d3,120(%a1)
+	swap %d3
+	move.w %d3,280(%a1)
+	rts
+
+c2p_pair:
+	movem.l %d2-%d4,-(%sp)
+	move.l 16(%sp),%a0
+	move.l 20(%sp),%a1
+	jbsr .Lkern
+	movem.l (%sp)+,%d2-%d4
+	rts
