@@ -268,6 +268,7 @@ int *__errno_location(void) { static int e; return &e; }
 
 /* exit: return to the OS through the crt0 exit path */
 extern void _exit_to_os(int rc) __attribute__((noreturn));
-void exit(int rc) { if (dbgfd > 0) Close(dbgfd); _exit_to_os(rc); }
+extern void plat_audio_exit(void);
+void exit(int rc) { plat_audio_exit(); if (dbgfd > 0) Close(dbgfd); _exit_to_os(rc); }
 void abort(void) { exit(20); }
 char *strerror(int e) { return "error"; }

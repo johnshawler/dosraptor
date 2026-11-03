@@ -49,3 +49,10 @@ cia_isr_stub:
 	movem.l	(%sp)+,%d2-%d7/%a2-%a6
 	moveq	#0,%d0
 	rts
+	.globl aud_isr_stub
+aud_isr_stub:
+	movem.l	%d2-%d7/%a2-%a6,-(%sp)
+	jsr	mix_block
+	movem.l	(%sp)+,%d2-%d7/%a2-%a6
+	moveq	#0,%d0
+	rts

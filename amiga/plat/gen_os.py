@@ -37,6 +37,7 @@ F = [
  ('OpenWindow','IntuitionBase',204,'void *',[('void *','nw','a0')]),
  ('CloseWindow','IntuitionBase',72,'void',[('void *','w','a0')]),
  ('SetPointer','IntuitionBase',270,'void',[('void *','w','a0'),('void *','data','a1'),('int','h','d0'),('int','wd','d1'),('int','xo','d2'),('int','yo','d3')]),
+ ('SetIntVector','SysBase',162,'void *',[('int','num','d0'),('void *','intr','a1')]),
  ('LoadView','GfxBase',222,'void',[('void *','view','a1')]),
  ('WaitTOF','GfxBase',270,'void',[]),
 ]

@@ -15,6 +15,7 @@ for f in os.listdir(DATA):
 ini = open(DATA + '/SETUP.INI').read().replace('CardType=5', 'CardType=' + os.environ.get('CARD', '0')).replace('Volume=85', 'Volume=' + os.environ.get('VOL', '0'))
 open(W + '/hd/SETUP.INI', 'w').write(ini)
 shutil.copy(D + '/build/raptor', W + '/hd/raptor')
+if os.environ.get('MUSICDIR'): shutil.copytree(os.environ['MUSICDIR'], W + '/hd/MUSIC')
 if os.environ.get('INJECT'): shutil.copy(os.environ['INJECT'], W + '/hd/inject.txt'); open(W + '/hd/S/startup-sequence', 'w').write('raptor\n')
 open(W + '/test.fs-uae', 'w').write(f'''[fs-uae]
 amiga_model = A1200
