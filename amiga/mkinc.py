@@ -10,7 +10,7 @@ for fn in os.listdir(data):
     if not m: continue
     _, res = items(os.path.join(data, fn)); fno = int(m.group(1))
     for i, name, opt, off, size in res:
-        names.setdefault(name, []).append((fno, i))
+        names.setdefault(name.rstrip('/ '), []).append((fno, i))
 out = []; missing = []
 for src, dst in zip(sys.argv[2::2], sys.argv[3::2]):
     own = int(re.search(r'FILE(\d{4})', os.path.basename(src), re.I).group(1))

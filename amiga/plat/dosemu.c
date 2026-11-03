@@ -46,7 +46,7 @@ int int386x(int n, const union REGS *in, union REGS *out, struct SREGS *s)
 		break;
 	case 0x33:
 		switch (in->w.ax) {
-		case 0: out->w.ax = 0xffff; out->w.bx = 2; break;
+		case 0: out->w.ax = -1; out->w.bx = 2; break;
 		case 4: plat_mouse_set(in->x.ecx >> 1, in->x.edx); break;
 		case 0x0C: mouse_mask = in->w.cx; mouse_handler = (void (*)(int,int,int))in->x.edx; break;
 		}
@@ -55,7 +55,14 @@ int int386x(int n, const union REGS *in, union REGS *out, struct SREGS *s)
 	return 0;
 }
 int int386(int n, const union REGS *in, union REGS *out) { return int386x(n, in, out, 0); }
-void plat_mouse_event(int buttons, int x, int y) { if (mouse_handler) mouse_handler(buttons, x << 1, y); }
+/* The game's mouse handler ignores events that arrive while it redraws the cursor.  Real drivers deliver them again on the next
+   movement; here every change is repeated on the following vertical blanks so that a dropped press/release cannot get lost. */
+#ifndef RESEND
+#define RESEND 6
+#endif
+static int ev_b, ev_x, ev_y, ev_repeat;
+void plat_mouse_event(int buttons, int x, int y) { ev_b = buttons; ev_x = x; ev_y = y; ev_repeat = RESEND; if (mouse_handler) mouse_handler(buttons, x << 1, y); }
+void plat_mouse_resend(void) { if (ev_repeat > 0 && mouse_handler) { ev_repeat--; mouse_handler(ev_b, ev_x << 1, ev_y); } }
 
 /* ---- DPMI memory ---- */
 int _dpmi_dosalloc(unsigned short paras, unsigned int *segment)

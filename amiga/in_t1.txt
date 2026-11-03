@@ -1,0 +1,6 @@
+wait WIN 0001002f
+delay 200
+mouse 163 94
+delay 100
+mouse 120 120
+delay 2000

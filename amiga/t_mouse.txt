@@ -1,0 +1,16 @@
+wait=WIN 0001002f 150
+sleep=3
+shot=m0
+mouse=400 300
+sleep=1
+click
+sleep=1
+mrel=0 40
+sleep=1
+mrel=0 40
+sleep=1
+shot=m1
+mrel=60 0
+sleep=1
+shot=m2
+end=1

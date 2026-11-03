@@ -219,11 +219,27 @@ int fputc(int c, void *fp) { char ch = c; fwrite(&ch, 1, 1, fp); return c; }
 int fputs(const char *s, void *fp) { fwrite(s, 1, strlen(s), fp); return 0; }
 int fprintf(void *fp, const char *f, ...) { char b[512]; va_list ap; va_start(ap, f); int r = vsnprintf(b, sizeof b, f, ap); va_end(ap); fwrite(b, 1, r, fp); return r; }
 int vfprintf(void *fp, const char *f, va_list ap) { char b[512]; int r = vsnprintf(b, sizeof b, f, ap); fwrite(b, 1, r, fp); return r; }
+/* debug output from interrupt context: collected in a ring buffer, written out by the next dbg_write()/dbg_flush() from the main task */
+char isr_ring[4096]; volatile unsigned isr_head, isr_tail;
+void isr_log(const char *f, ...)
+{
+	char b[160]; va_list ap; va_start(ap, f); int n = vsnprintf(b, sizeof b, f, ap); va_end(ap);
+	for (int i = 0; i < n; i++) { unsigned nh = (isr_head + 1) & 4095; if (nh == isr_tail) break; isr_ring[isr_head] = b[i]; isr_head = nh; }
+}
 int dbgfd;
+extern void inject_log(const char *s);
+void dbg_flush(void);
 void dbg_write(const char *s)
 {
+	inject_log(s);
 	if (!dbgfd) { LONG fh = Open("SYS:dbg.log", MODE_NEWFILE); dbgfd = fh ? fh : -1; }
-	if (dbgfd > 0) { Write(dbgfd, s, strlen(s)); }
+	if (dbgfd > 0) { extern volatile unsigned plat_vbl_count; char pre[16]; int n = sprintf(pre, "[%u] ", plat_vbl_count); Write(dbgfd, pre, n); Write(dbgfd, s, strlen(s)); }
+}
+void dbg_flush(void)
+{
+	char b[256]; int n = 0;
+	while (isr_tail != isr_head && n < 255) { b[n++] = isr_ring[isr_tail]; isr_tail = (isr_tail + 1) & 4095; }
+	if (n) { b[n] = 0; if (!dbgfd) dbg_write(""); if (dbgfd > 0) Write(dbgfd, b, n); }
 }
 int printf(const char *f, ...) { char b[512]; va_list ap; va_start(ap, f); int r = vsnprintf(b, sizeof b, f, ap); va_end(ap); dbg_write(b); return r; }
 int vprintf(const char *f, va_list ap) { char b[512]; int r = vsnprintf(b, sizeof b, f, ap); dbg_write(b); return r; }

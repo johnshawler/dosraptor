@@ -1,0 +1,13 @@
+wait=WIN 0001002f 150
+sleep=2
+key=Return
+sleep=8
+keys=john
+sleep=3
+shot=n1
+key=Return
+sleep=1
+keys=ace
+sleep=2
+shot=n2
+end=1

@@ -5,6 +5,8 @@
 typedef struct { void (*fn)(void); int rate; int pause; int used; int acc; int pri; } Svc;
 static Svc svc[MAXSVC];
 volatile unsigned plat_vbl_count;
+extern void inject_tick(void);
+extern void plat_mouse_resend(void);
 static int vbl_hz = 50;
 static struct __attribute__((packed)) { void *succ, *pred; unsigned char type, pri; char *name; void *data; void *code; } is;
 extern void vbl_isr_stub(void);
@@ -14,6 +16,8 @@ void tsm_vbl(void)
 	plat_vbl_count++;
 	plat_poll_input();
 	plat_vbl_hw();
+	inject_tick();
+	plat_mouse_resend();
 	for (int i = 0; i < MAXSVC; i++) {
 		if (!svc[i].used || svc[i].pause) continue;
 		svc[i].acc += svc[i].rate;

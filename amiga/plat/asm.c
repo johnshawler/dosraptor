@@ -2,6 +2,7 @@
    Data from the GLB files is converted to native (big endian) byte order when loaded (see glbswap.c). */
 #include "os.h"
 #include <string.h>
+void plat_present(void);
 typedef unsigned char BYTE; typedef int INT; typedef unsigned int DWORD; typedef unsigned short UW;
 
 #define SCREENWIDTH 320
@@ -79,6 +80,7 @@ void GFX_DisplayScreen(void)
 	if (ud_lx == SCREENWIDTH) memcpy(d, s, (ud_lx * ud_ly) & ~3);
 	else { INT n = (ud_lx >> 2) << 2, ly = ud_ly; while (ly--) { memcpy(d, s, n); s += SCREENWIDTH; d += SCREENWIDTH; } }
 	update_start = 0;
+	plat_present();
 }
 
 /* ---- tiles ---- */
@@ -96,11 +98,13 @@ void TILE_ShakeScreen(void)
 {
 	BYTE *s = displaybuffer + 16 - 4, *d = displayscreen + g_mapleft - 4;
 	for (int y = 0; y < 200; y++) { memcpy(d, s, 296); s += SCREENWIDTH; d += SCREENWIDTH; }
+	plat_present();
 }
 void TILE_DisplayScreen(void)
 {
 	BYTE *s = displaybuffer + 16, *d = displayscreen + 16;
 	for (int y = 0; y < 200; y++) { memcpy(d, s, 288); s += SCREENWIDTH; d += SCREENWIDTH; }
+	plat_present();
 }
 
 /* ---- movie ---- */

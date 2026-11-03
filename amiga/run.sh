@@ -20,12 +20,15 @@ window_height = 512
 sound_output = 0
 automatic_input_grab = 0
 fullscreen = 0
+accuracy = ${ACC:-0}
+cpu_speed = ${CPUSPEED:-real}
 EOF
 export DISPLAY=:97
 Xvfb :97 -screen 0 800x600x24 >/dev/null 2>&1 &
 XP=$!; sleep 1
 timeout $((SECS+10)) fs-uae $W/test.fs-uae > $W/fsuae.log 2>&1 &
 FP=$!
+( for item in $INPUT; do t=${item%%:*}; k=${item#*:}; sleep $(echo "$t - ${LAST:-0}" | bc); LAST=$t; if [ "${k#click}" != "$k" ]; then xdotool click 1; else xdotool key --delay 150 $k; fi; done ) &
 for t in $(seq ${STEP:-5} ${STEP:-5} $SECS); do sleep ${STEP:-5}; import -window root $W/${OUT}_$t.png 2>/dev/null; done
 kill $FP 2>/dev/null; sleep 1; kill $XP 2>/dev/null
 ls $W/hd; cat $W/hd/dbg.log 2>/dev/null | head -50

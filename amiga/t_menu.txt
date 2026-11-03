@@ -1,0 +1,16 @@
+wait=WIN 0001002f 150
+sleep=2
+shot=menu
+key=Return
+sleep=8
+shot=name
+keys=john
+key=Return
+sleep=1
+keys=ace
+key=Return
+sleep=10
+shot=after_name
+sleep=10
+shot=after_name2
+end=1

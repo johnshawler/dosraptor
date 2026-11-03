@@ -1,0 +1,10 @@
+wait=WIN 0001002f 150
+sleep=150
+shot=g1
+sleep=40
+shot=g2
+sleep=40
+shot=g3
+sleep=40
+shot=g4
+end=1

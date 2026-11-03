@@ -4,6 +4,7 @@
 #include "os.h"
 #include "plat.h"
 int sprintf(char *, const char *, ...);
+void inject_init(void);
 void c2p_pair(const unsigned char *src, unsigned char *dst);
 
 void *IntuitionBase, *GfxBase;
@@ -33,7 +34,8 @@ void plat_vbl_hw(void)
 {
 	if (!active) return;
 	/* mouse */
-	static unsigned short last; unsigned short j = R16(0x00A);
+	static int primed; static unsigned short last; unsigned short j = R16(0x00A);
+	if (!primed) { primed = 1; last = j; }
 	signed char dx = (signed char)((j & 0xff) - (last & 0xff)), dy = (signed char)((j >> 8) - (last >> 8));
 	last = j;
 	if (dx || dy) {
@@ -92,6 +94,8 @@ void plat_video_open(void)
 	R16(0x080) = (unsigned)cop >> 16; R16(0x082) = (unsigned)cop & 0xffff; R16(0x088) = 0;
 	R16(0x096) = 0x8000 | 0x0200 | 0x0100 | 0x0080;   /* DMAEN BPLEN COPEN */
 	active = 1; pal_dirty = 1;
+	inject_init();
+	{ extern char isr_ring[]; char b[40]; sprintf(b, "ISRRING %x\n", (unsigned)isr_ring); dbg_write(b); }
 }
 void plat_video_close(void)
 {
@@ -100,8 +104,10 @@ void plat_video_close(void)
 	LoadView(oldview); WaitTOF(); WaitTOF();
 	if (window) { CloseWindow(window); window = 0; }
 }
+void dbg_flush(void);
 void plat_present(void)
 {
+	dbg_flush();
 	if (!active) return;
 	const unsigned char *src = plat_vram; unsigned char *dst = planes;
 	for (int y = 0; y < 200; y++) {

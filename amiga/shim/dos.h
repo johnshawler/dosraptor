@@ -5,7 +5,7 @@
 #include <string.h>
 union REGS {
 	struct { unsigned int eax, ebx, ecx, edx, esi, edi, cflag; } x;
-	struct { unsigned short _ah, ax, _bh, bx, _ch, cx, _dh, dx, _sh, si, _dih, di; } w;
+	struct { short _ah, ax, _bh, bx, _ch, cx, _dh, dx, _sh, si, _dih, di; } w;
 	struct { unsigned char _a0, _a1, ah, al, _b0, _b1, bh, bl, _c0, _c1, ch, cl, _d0, _d1, dh, dl; } h;
 };
 struct SREGS { unsigned short es, cs, ss, ds, fs, gs; };

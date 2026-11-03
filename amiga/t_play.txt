@@ -1,0 +1,15 @@
+wait=WIN 0001002f 150
+wait=STATE GAME 400
+sleep=4
+shot=p1
+sleep=4
+shot=p2
+sleep=6
+shot=p3
+sleep=10
+shot=p4
+sleep=20
+shot=p5
+sleep=30
+shot=p6
+end=1

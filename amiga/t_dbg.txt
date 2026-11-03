@@ -1,0 +1,2 @@
+wait=WIN 0001002f 150
+sleep=50

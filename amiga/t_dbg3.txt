@@ -1,0 +1,10 @@
+wait=WIN 0001002f 150
+sleep=50
+dbg=r
+dbg=m 264358 1
+dbg=g
+sleep=5
+brk=1
+dbg=r
+dbg=m 264358 1
+end=1
