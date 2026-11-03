@@ -42,3 +42,10 @@ vbl_isr_stub:
 	movem.l	(%sp)+,%d2-%d7/%a2-%a6
 	moveq	#1,%d0
 	rts
+	.globl cia_isr_stub
+cia_isr_stub:
+	movem.l	%d2-%d7/%a2-%a6,-(%sp)
+	jsr	tsm_cia
+	movem.l	(%sp)+,%d2-%d7/%a2-%a6
+	moveq	#0,%d0
+	rts
