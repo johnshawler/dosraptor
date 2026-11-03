@@ -19,7 +19,8 @@ if os.environ.get('INJECT'): shutil.copy(os.environ['INJECT'], W + '/hd/inject.t
 open(W + '/test.fs-uae', 'w').write(f'''[fs-uae]
 amiga_model = A1200
 kickstart_file = {KICK}
-{'accelerator = blizzard-1230-iv' + chr(10) + 'accelerator_memory = 8192' if os.environ.get('CPU') == '030' else 'fast_memory = 8192'}
+fast_memory = 8192
+{'cpu = 68030' if os.environ.get('CPU') == '030' else ''}
 hard_drive_0 = {W}/hd
 hard_drive_0_label = SYS
 window_width = 640
