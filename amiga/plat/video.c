@@ -108,10 +108,23 @@ void dbg_flush(void);
 void plat_present(void)
 {
 	dbg_flush();
+#ifdef FPS_TRACE
+	{ static unsigned n; extern volatile unsigned plat_vbl_count; if (++n % 100 == 0) { char b[40]; sprintf(b, "PRES %u\n", n); dbg_write(b); } }
+#endif
 	if (!active) return;
+#ifdef NOC2P
+	return;
+#endif
 	const unsigned char *src = plat_vram; unsigned char *dst = planes;
+	static unsigned shadow[320 * 200 / 4];
+	unsigned *sh = shadow;
 	for (int y = 0; y < 200; y++) {
-		for (int x = 0; x < 20; x++) c2p_pair(src + x * 16, dst + x * 2);
+		const unsigned *l = (const unsigned *)src;
+		for (int x = 0; x < 20; x++, l += 4, sh += 4) {
+			if (l[0] == sh[0] && l[1] == sh[1] && l[2] == sh[2] && l[3] == sh[3]) continue;
+			sh[0] = l[0]; sh[1] = l[1]; sh[2] = l[2]; sh[3] = l[3];
+			c2p_pair(src + x * 16, dst + x * 2);
+		}
 		src += 320; dst += 320;
 	}
 }

@@ -11,6 +11,7 @@ GAME    := anims bonus enemy eshot flame fx help input intro loadsave movie obje
 PLAT    := inject libc video tsm dosemu asm stubs main glbswap
 OBJS    := $(addprefix $(OBJ)/,$(addsuffix .o,$(GAME) $(PLAT))) $(OBJ)/c2p.o
 
+export RAPTOR_DATA
 all: build/raptor
 $(SRC)/.stamp: mirror.sh
 	./mirror.sh && touch $@

@@ -59,7 +59,7 @@ open('glbapi.c','w').write(s)
 PY
 sed -i 's/EXIT_Error ( "GLB_FetchItem: failed on %d bytes, mode=%d.", ii->size, mode );/EXIT_Error ( "GLB_FetchItem: failed on %d bytes, mode=%d handle=%08x.", ii->size, mode, handle );/' glbapi.c
 cd ../..   # amiga/
-RD=${RAPTOR_DATA:-/tmp/claude-0/-home-user/387e5900-dc29-591a-9a5a-61a50108a5bd/scratchpad/rz/raptor}
+RD=${RAPTOR_DATA:?set RAPTOR_DATA to the directory holding FILE0000.GLB and FILE0001.GLB}
 ./mkinc.py "$RD" build/src/file0000.inc build/src/file0000.inc build/src/file0001.inc build/src/file0001.inc
 cd build/src
 python3 - <<'PY'
