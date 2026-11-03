@@ -95,8 +95,8 @@ def mark(fn, func, tag):
     s=s[:m.end()]+'\n   printf("STATE %s\\n");'%tag+s[m.end():]
     open(fn,'w').write(s)
 s=open('swdapi.c').read()
-s=s.replace("   KBD_LASTSCAN = SC_NONE;\n   KBD_LASTASCII = SC_NONE;\n   _enable();","   KBD_LASTSCAN = SC_NONE;\n   KBD_LASTASCII = SC_NONE;\n   _enable();\n   { static int hb2; extern int inject_dbg[4]; if ( HB_TRACE && ++hb2 % 300 == 0 ) printf(\"HB cur=%d ev=%d wait=%d dl=%d\\n\", inject_dbg[0], inject_dbg[1], inject_dbg[2], inject_dbg[3] ); }\n   if ( g_key && DLG_TRACE ) printf(\"SWDKEY %x %x af=%d kb=%d aw=%d\\n\", g_key, g_ascii, active_field, kbactive, active_window );",1)
-s="#ifndef HB_TRACE\n#define HB_TRACE 0\n#endif\n#ifndef DLG_TRACE\n#define DLG_TRACE 0\n#endif\n"+s
+s=s.replace("   KBD_LASTSCAN = SC_NONE;\n   KBD_LASTASCII = SC_NONE;\n   _enable();","   KBD_LASTSCAN = SC_NONE;\n   KBD_LASTASCII = SC_NONE;\n   _enable();\n   { static int hb2; extern int inject_dbg[4]; if ( HB_TRACE && ++hb2 % 20000 == 0 ) { dbg_flush(); printf(\"HB cur=%d ev=%d wait=%d dl=%d\\n\", inject_dbg[0], inject_dbg[1], inject_dbg[2], inject_dbg[3] ); }}\n   if ( g_key && DLG_TRACE ) printf(\"SWDKEY %x %x af=%d kb=%d aw=%d\\n\", g_key, g_ascii, active_field, kbactive, active_window );",1)
+s="void dbg_flush(void);\n#ifndef HB_TRACE\n#define HB_TRACE 0\n#endif\n#ifndef DLG_TRACE\n#define DLG_TRACE 0\n#endif\n"+s
 open('swdapi.c','w').write(s)
 s=open('ptrapi.c').read()
 s=s.replace("   if ( not_in_update )\n   {\n      cur_mx = m_cx&0xffff;","   if ( MOUSE_TRACE && ( m_bx != mouseb1 ) ) isr_log(\"MOUSE b=%d x=%d y=%d niu=%d\\n\", m_bx, m_cx>>1, m_dx, not_in_update );\n   if ( not_in_update )\n   {\n      cur_mx = m_cx&0xffff;",1)

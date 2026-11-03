@@ -37,10 +37,13 @@ void inject_init(void)
 	while (*p && nlines < MAXLINES) { lines[nlines++] = p; while (*p && *p != '\n') p++; if (*p) *p++ = 0; }
 	waiting = 0; cur = 0;
 }
+static char hist[16][48]; static int hist_n;
 void inject_log(const char *s)
 {
-	if (waiting && strstr(s, waitpat)) waiting = 0;
+	if (waiting && strstr(s, waitpat)) { waiting = 0; return; }
+	if (!waiting) { int i = 0; for (; i < 47 && s[i] && s[i] != '\n'; i++) hist[hist_n & 15][i] = s[i]; hist[hist_n & 15][i] = 0; hist_n++; }
 }
+static int seen(const char *pat) { for (int i = 0; i < 16; i++) { if (hist[i][0] && strstr(hist[i], pat)) { for (int k = 0; k < 16; k++) hist[k][0] = 0; return 1; } } return 0; }
 extern void plat_mouse_event(int, int, int);
 extern void KBD_ReadScan(int);
 static int typebuf[64], ntype, typepos;
@@ -56,7 +59,7 @@ void inject_tick(void)
 	if (delay > 0) { delay--; return; }
 	while (cur < nlines) {
 		char *l = lines[cur++];
-		if (!strncmp(l, "wait ", 5)) { int i = 0; for (const char *q = l + 5; *q && i < 63; q++) waitpat[i++] = *q; waitpat[i] = 0; waiting = 1; return; }
+		if (!strncmp(l, "wait ", 5)) { int i = 0; for (const char *q = l + 5; *q && i < 63; q++) waitpat[i++] = *q; waitpat[i] = 0; waiting = !seen(waitpat); return; }
 		if (!strncmp(l, "delay ", 6)) { delay = atoi(l + 6); return; }
 		if (!strncmp(l, "key ", 4)) { int v = 0; for (const char *q = l + 4; *q; q++) { int d = (*q >= '0' && *q <= '9') ? *q - '0' : (*q >= 'a' && *q <= 'f') ? *q - 'a' + 10 : -1; if (d < 0) break; v = v * 16 + d; } KBD_ReadScan(v); pending_up = v; up_delay = 6; return; }
 		if (!strncmp(l, "text ", 5)) { ntype = typepos = 0; for (const char *q = l + 5; *q && ntype < 64; q++) { int sc = sc_of(*q); if (sc) typebuf[ntype++] = sc; } return; }
