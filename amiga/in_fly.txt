@@ -11,9 +11,10 @@ text ace
 key 1c
 wait WIN 0001003a
 delay 150
-mouse 160 78
-delay 80
-click 1
+delay 60
+key 50
+delay 30
+key 1c
 wait STATE HANGAR
 delay 200
 mouse 97 124

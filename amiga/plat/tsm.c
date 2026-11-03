@@ -7,7 +7,8 @@ static Svc svc[MAXSVC];
 volatile unsigned plat_vbl_count;
 extern void inject_tick(void);
 extern void plat_mouse_resend(void);
-static int vbl_hz = 50;
+int plat_vbl_hz = 50, plat_pal = 1;
+#define vbl_hz plat_vbl_hz
 static struct __attribute__((packed)) { void *succ, *pred; unsigned char type, pri; char *name; void *data; void *code; } is;
 extern void vbl_isr_stub(void);
 static int installed;
@@ -29,7 +30,7 @@ void TSM_Install(int rate)
 	if (installed) return;
 	/* PAL flag: GfxBase->DisplayFlags (offset 206), PAL = 4 */
 	void *gb = OpenLibrary("graphics.library", 36);
-	if (gb) { unsigned char fl = *(unsigned char *)((char *)gb + 206); vbl_hz = (fl & 4) ? 50 : 60; CloseLibrary(gb); }
+	if (gb) { unsigned char fl = *(unsigned char *)((char *)gb + 206); vbl_hz = (fl & 4) ? 50 : 60; plat_pal = (fl & 4) ? 1 : 0; CloseLibrary(gb); }
 	is.type = 2 /*NT_INTERRUPT*/; is.pri = 0; is.name = "raptor.vbl"; is.data = 0; is.code = (void *)vbl_isr_stub;
 	AddIntServer(5 /*INTB_VERTB*/, &is);
 	installed = 1;

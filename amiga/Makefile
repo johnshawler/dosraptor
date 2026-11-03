@@ -8,7 +8,7 @@ CFLAGS  := -x c -m68030 -malign-int -funsigned-char -fno-stack-protector -U_FORT
            -fno-pic -fno-pie -ffreestanding -fno-builtin -Ishim -I$(SRC) -Iplat -D__cdecl= -D__far= -D__near= -D__interrupt= -DO_BINARY=0 -D_MAX_PATH=260 -include errno.h -DAMIGA $(EXTRA) -MMD -MP
 GAME    := anims bonus enemy eshot flame fx help input intro loadsave movie objects shadows shots store tile windows rap \
            vmemapi prefapi ptrapi gfxapi exitapi glbapi imsapi kbdapi swdapi
-PLAT    := inject libc video tsm dosemu asm stubs main glbswap
+PLAT    := audio inject libc video tsm dosemu asm stubs main glbswap
 OBJS    := $(addprefix $(OBJ)/,$(addsuffix .o,$(GAME) $(PLAT))) $(OBJ)/c2p.o
 
 export RAPTOR_DATA
