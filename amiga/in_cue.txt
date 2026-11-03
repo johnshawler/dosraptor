@@ -1,0 +1,100 @@
+wait WIN 0001002f
+delay 400
+mouse 163 94
+delay 10
+click 1
+wait WIN 00010034
+delay 150
+text john
+key 1c
+text ace
+key 1c
+wait WIN 0001003a
+delay 150
+delay 60
+key 50
+delay 30
+key 1c
+wait STATE HANGAR
+delay 200
+mouse 97 124
+delay 50
+click 1
+wait STATE SHIPCOMP
+delay 300
+mouse 162 42
+delay 20
+click 1
+wait STATE GAME
+delay 200
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 1d
+delay 10
+key 4b
+delay 20
+key 4b
+delay 20
+key 4b
+delay 20
+key 4b
+delay 20
+key 4b
+delay 20
+delay 600

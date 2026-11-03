@@ -7,6 +7,7 @@
 #define AUD(c, r) (0x0A0 + (c) * 0x10 + (r))
 #define BUFSZ 40000
 extern volatile unsigned plat_vbl_count;
+void isr_log(const char *f, ...);
 extern int plat_vbl_hz;
 extern int plat_pal;
 void *memcpy(void *, const void *, unsigned);
@@ -63,6 +64,7 @@ int SFX_PlayPatch(void *vdata, int pitch, int sep, int vol, int unk1, int priori
 	R16(0x096) = 0x8000 | 0x0200 | (1 << c);               /* DMAEN + channel on */
 	for (int n = 0; n < 4000 && !(R16(0x01E) & (0x0080 << c)); n++) ;
 	R16(AUD(c, 0)) = (unsigned)silence >> 16; R16(AUD(c, 2)) = (unsigned)silence & 0xffff; R16(AUD(c, 4)) = 2;   /* after one pass: silence */
+	isr_log("CUE sfx id=%d ch=%d rate=%u len=%u vol=%d sep=%d pitch=%d t=%u\n", next_id, c, rate, len, v, sep, pitch, now);
 	ch[c].id = next_id; ch[c].end = now + (unsigned)((unsigned long long)len * plat_vbl_hz / rate) + 2;
 	next_id = (next_id + 1) & 0x7fff; if (!next_id) next_id = 1;
 	return ch[c].id;
