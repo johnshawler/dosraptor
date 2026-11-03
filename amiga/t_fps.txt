@@ -1,4 +1,4 @@
 wait=WIN 0001002f 150
 wait=STATE GAME 900
-sleep=60
+sleep=90
 end=1

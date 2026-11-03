@@ -192,7 +192,13 @@ long long lseek64(int fd, long long off, int whence) { return lseek(fd, (long)of
 long filelength(int fd) { long cur = lseek(fd, 0, 1); long end = lseek(fd, 0, 2); lseek(fd, cur, 0); return end; }
 int access(const char *name, int mode) { LONG fh = Open(name, MODE_OLDFILE); if (!fh) return -1; Close(fh); return 0; }
 int remove(const char *name) { register void *a6 __asm("a6") = DOSBase; register ULONG d1 __asm("d1") = (ULONG)name; register LONG d0 __asm("d0"); __asm volatile("jsr -72(%%a6)" : "=r"(d0), "+r"(d1) : "r"(a6) : "a0", "a1", "memory", "cc"); return d0 ? 0 : -1; }
-char *getenv(const char *n) { return NULL; }
+char *getenv(const char *n)
+{
+#ifdef GODMODE
+	if (!strcmp(n, "S_HOST")) return "CASTLE";   /* test builds: invulnerable ship */
+#endif
+	return NULL;
+}
 int chsize(int fd, long sz) { return 0; }
 int fileno(void *f) { return *(int *)f; }
 
