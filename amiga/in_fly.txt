@@ -12,7 +12,7 @@ key 1c
 wait WIN 0001003a
 delay 150
 mouse 160 78
-delay 20
+delay 80
 click 1
 wait STATE HANGAR
 delay 200
