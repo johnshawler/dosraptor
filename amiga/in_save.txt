@@ -1,0 +1,23 @@
+wait WIN 0001002f
+delay 400
+mouse 163 94
+delay 10
+click 1
+wait WIN 00010034
+delay 150
+text john
+key 1c
+text ace
+key 1c
+wait WIN 0001003a
+delay 150
+delay 60
+key 50
+delay 30
+key 1c
+wait STATE HANGAR
+delay 300
+key 1f
+delay 200
+key 15
+delay 400

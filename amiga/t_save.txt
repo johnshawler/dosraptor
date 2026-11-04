@@ -1,0 +1,4 @@
+wait=STATE HANGAR 900
+sleep=60
+shot=s1
+end=1

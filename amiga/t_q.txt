@@ -1,0 +1,3 @@
+wait=main\(\) 150
+sleep=3
+end=1
