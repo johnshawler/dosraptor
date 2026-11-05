@@ -37,7 +37,10 @@ cpu_speed = {os.environ.get('CPUSPEED', 'max')}
 joystick_port_0 = none
 joystick_port_1 = none
 ''')
-xv = subprocess.Popen('Xvfb :96 -screen 0 800x600x24', shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL); time.sleep(1)
+xv = subprocess.Popen('Xvfb :96 -screen 0 800x600x24', shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+for _ in range(30):
+    if subprocess.run('xdpyinfo -display :96', shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0: break
+    time.sleep(1)
 fs = subprocess.Popen(f'fs-uae {W}/test.fs-uae', shell=True, env=env, stdin=subprocess.PIPE, stdout=open(W + '/fsuae.log', 'w'), stderr=subprocess.STDOUT)
 dbg_active = False
 t0 = time.time()
