@@ -1,0 +1,29 @@
+wait WIN {MAIN_SWD}
+delay 400
+mouse 163 94
+delay 10
+click 1
+wait WIN {REGISTER_SWD}
+delay 150
+text john
+key 1c
+text ace
+key 1c
+wait WIN {ASKDIFF_SWD}
+delay 150
+delay 60
+key 50
+delay 30
+key 1c
+wait STATE HANGAR
+delay 200
+mouse 97 124
+delay 50
+click 1
+wait STATE SHIPCOMP
+delay 300
+mouse 162 99
+delay 20
+click 1
+wait STATE GAME
+delay 400
