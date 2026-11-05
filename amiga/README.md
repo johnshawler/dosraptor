@@ -1,13 +1,13 @@
 # Raptor: Call of the Shadows – Amiga 1200 (AGA) port
 
-A source port of the DOS v1.2 sources in this repository to the Amiga 1200 (68020+, AGA, 2 MB chip, 8 MB fast, Kickstart 3.1).
+A source port of the DOS v1.2 sources in this repository to the Amiga 1200 (target: 68EC030, AGA, 2 MB chip, 8 MB fast, Kickstart 3.1; all measurements use FS-UAE with `cpu = 68030`).
 The game code (`SOURCE/`, `GFX/`) is compiled unchanged apart from small compatibility patches that `mirror.sh` applies to a
 copy of the tree in `build/src`; everything platform specific lives in `plat/`.
 
-Status: boots, plays the intro, menus, pilot creation, hangar, level loading and the first level (shareware data).
-**Not done yet:** sound and music (all cards report "none"; `SETUP.INI` is run with `CardType=0`), saving/loading pilots has not been
-tested, the frame rate on a stock 14 MHz 68020 is far below the original 35 fps (full-screen chunky-to-planar conversion dominates),
-untested on real hardware.
+Status: boots, plays the intro, menus, pilot creation, hangar, level loading and the first level (shareware data) with sound effects
+(software mixer on Paula) and music (the OPL2/GENMIDI scores rendered offline by `tools/mus2pcm.py`).
+**Not done yet / unverified:** saving and loading pilots, the credits/demo/help screens, a frame-by-frame comparison with the DOS
+version, real hardware (everything was run in FS-UAE with `cpu = 68030`; the stock 68020 A1200 is not a target).
 
 ## Build
 Needs `m68k-linux-gnu-gcc`, `binutils-m68k-linux-gnu`, `libc6-dev-m68k-cross` (headers only) and Python 3.
