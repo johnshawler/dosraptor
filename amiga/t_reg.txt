@@ -1,4 +1,4 @@
-wait=STATE GAME 1500
+wait=STATE GAME 900
 sleep=40
 shot=r1
 end=1
