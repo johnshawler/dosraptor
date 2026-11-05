@@ -7,17 +7,7 @@ void *DOSBase;
 #define NULL ((void*)0)
 
 /* ------------------------------------------------------------ memory / string */
-void *memcpy(void *d, const void *s, size_t n)
-{
-	unsigned char *dp = d; const unsigned char *sp = s;
-	if (n >= 8 && !(((unsigned)dp | (unsigned)sp) & 3)) {
-		unsigned *dl = (unsigned *)dp; const unsigned *sl = (const unsigned *)sp;
-		for (size_t k = n >> 2; k; k--) *dl++ = *sl++;
-		dp = (unsigned char *)dl; sp = (const unsigned char *)sl; n &= 3;
-	}
-	while (n--) *dp++ = *sp++;
-	return d;
-}
+void *memcpy(void *d, const void *s, size_t n);   /* fast.s */
 void *memmove(void *d, const void *s, size_t n)
 {
 	unsigned char *dp = d; const unsigned char *sp = s;

@@ -9,7 +9,7 @@ CFLAGS  := -x c -m68030 -malign-int -funsigned-char -fno-stack-protector -U_FORT
 GAME    := anims bonus enemy eshot flame fx help input intro loadsave movie objects shadows shots store tile windows rap \
            vmemapi prefapi ptrapi gfxapi exitapi glbapi imsapi kbdapi swdapi
 PLAT    := audio inject libc video tsm dosemu asm stubs main glbswap
-OBJS    := $(addprefix $(OBJ)/,$(addsuffix .o,$(GAME) $(PLAT))) $(OBJ)/c2p.o
+OBJS    := $(addprefix $(OBJ)/,$(addsuffix .o,$(GAME) $(PLAT))) $(OBJ)/c2p.o $(OBJ)/fast.o
 
 export RAPTOR_DATA
 all: build/raptor

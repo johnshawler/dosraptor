@@ -84,16 +84,9 @@ void GFX_DisplayScreen(void)
 }
 
 /* ---- tiles ---- */
-void TILE_Draw(void)
-{
-	BYTE *s = tilepic, *d = tilestart;
-	for (int y = 0; y < 32; y++) { memcpy(d, s, 32); s += 32; d += SCREENWIDTH; }
-}
-void TILE_ClipDraw(void)
-{
-	BYTE *s = tilepic, *d = tilestart;
-	for (int y = 0; y < tileloopy; y++) { memcpy(d, s, 32); s += 32; d += SCREENWIDTH; }
-}
+void tile_blit(BYTE *d, BYTE *s, int rows);
+void TILE_Draw(void) { tile_blit(tilestart, tilepic, 32); }
+void TILE_ClipDraw(void) { tile_blit(tilestart, tilepic, tileloopy); }
 void TILE_ShakeScreen(void)
 {
 	BYTE *s = displaybuffer + 16 - 4, *d = displayscreen + g_mapleft - 4;

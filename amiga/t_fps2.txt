@@ -1,0 +1,3 @@
+wait=STATE GAME 1200
+sleep=100
+end=1

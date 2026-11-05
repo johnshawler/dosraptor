@@ -5,6 +5,7 @@
 #include "plat.h"
 int sprintf(char *, const char *, ...);
 void inject_init(void);
+void c2p_frame(const unsigned char *, unsigned *, unsigned char *);
 void c2p_pair(const unsigned char *src, unsigned char *dst);
 
 void *IntuitionBase, *GfxBase;
@@ -117,16 +118,7 @@ void plat_present(void)
 #endif
 	const unsigned char *src = plat_vram; unsigned char *dst = planes;
 	static unsigned shadow[320 * 200 / 4];
-	unsigned *sh = shadow;
-	for (int y = 0; y < 200; y++) {
-		const unsigned *l = (const unsigned *)src;
-		for (int x = 0; x < 20; x++, l += 4, sh += 4) {
-			if (l[0] == sh[0] && l[1] == sh[1] && l[2] == sh[2] && l[3] == sh[3]) continue;
-			sh[0] = l[0]; sh[1] = l[1]; sh[2] = l[2]; sh[3] = l[3];
-			c2p_pair(src + x * 16, dst + x * 2);
-		}
-		src += 320; dst += 320;
-	}
+	c2p_frame(plat_vram, shadow, planes);
 }
 void plat_mouse_set(int x, int y) { mouse_x = x; mouse_y = y; }
 
