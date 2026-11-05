@@ -43,7 +43,7 @@ open('gfxapi.c','w').write(g)
 PY
 sed -i 's/^PRIVATE INT       active_field/PUBLIC  INT       active_field/' swdapi.c
 sed -i 's/^   header = ( SWIN \* )GLB_LockItem ( handle );/   printf("WIN %08x\\n", handle);\n   header = ( SWIN * )GLB_LockItem ( handle );/' swdapi.c
-: > regver.h   # shareware data set (FILE0000/FILE0001 only): build the unregistered variant
+[ -e "${RAPTOR_DATA:?}/FILE0002.GLB" ] || : > regver.h   # shareware data (FILE0000/FILE0001 only): unregistered build; registered data keeps REG_VERSION
 python3 - <<'PY'
 s=open('glbapi.c').read()
 s=s.replace('PRIVATE CHAR *    serial = "32768GLB";','PRIVATE CHAR *    serial = "32768GLB";\nextern void GLB_SwapItem(const char *name, BYTE *p, unsigned size);\nstatic DWORD sw32k(DWORD v){return (v>>24)|((v>>8)&0xff00)|((v<<8)&0xff0000)|(v<<24);}')
@@ -60,7 +60,8 @@ PY
 sed -i 's/EXIT_Error ( "GLB_FetchItem: failed on %d bytes, mode=%d.", ii->size, mode );/EXIT_Error ( "GLB_FetchItem: failed on %d bytes, mode=%d handle=%08x.", ii->size, mode, handle );/' glbapi.c
 cd ../..   # amiga/
 RD=${RAPTOR_DATA:?set RAPTOR_DATA to the directory holding FILE0000.GLB and FILE0001.GLB}
-./mkinc.py "$RD" build/src/file0000.inc build/src/file0000.inc build/src/file0001.inc build/src/file0001.inc
+set --; for n in 0 1 2 3 4; do [ -e "$RD/FILE000$n.GLB" ] && [ -e build/src/file000$n.inc ] && set -- "$@" build/src/file000$n.inc build/src/file000$n.inc; done
+./mkinc.py "$RD" "$@"
 cd build/src
 python3 - <<'PY'
 s=open('glbapi.c').read()

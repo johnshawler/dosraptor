@@ -10,6 +10,7 @@ rdbtool "$OUT" create size=${SIZE:-40Mi} + init + add size=100% name=DH0 dostype
 CMDS="open part=DH0 + format Raptor ffs + makedir S + write $T/startup-sequence S/startup-sequence + write $D/build/raptor raptor + write $T/SETUP.INI SETUP.INI"
 CMDS="$CMDS + makedir MUSIC"
 for f in $T/music/*; do CMDS="$CMDS + write $f MUSIC/$(basename $f)"; done
+[ -e "$DATA/FILE_ID.DIZ" ] && CMDS="$CMDS + write $DATA/FILE_ID.DIZ FILE_ID.DIZ"
 for f in "$DATA"/*.GLB; do CMDS="$CMDS + write $f $(basename $f)"; done
 xdftool "$OUT" $CMDS > /dev/null
 rm -rf $T; ls -la "$OUT"

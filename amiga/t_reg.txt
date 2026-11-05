@@ -1,0 +1,4 @@
+wait=STATE GAME 1500
+sleep=40
+shot=r1
+end=1
