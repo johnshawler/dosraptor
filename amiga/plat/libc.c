@@ -165,21 +165,33 @@ void *realloc(void *p, size_t n)
 /* --------------------------------------------------------------- low-level io */
 #define MAXFD 32
 static LONG fdtab[MAXFD];
+static long fdpos[MAXFD], fdsize[MAXFD];       /* tracked position: sequential access costs no extra dos.library calls */
 int open(const char *name, int flags, ...)
 {
 	int fd; for (fd = 3; fd < MAXFD; fd++) if (!fdtab[fd]) break;
 	if (fd == MAXFD) return -1;
 	LONG fh = Open(name, (flags & 3) || (flags & 0x40) ? ((flags & 0x40) ? MODE_NEWFILE : 1004 /*MODE_READWRITE*/) : MODE_OLDFILE);
 	if (!fh) return -1;
-	fdtab[fd] = fh; return fd;
+	fdtab[fd] = fh; fdpos[fd] = 0; fdsize[fd] = -1; return fd;
 }
 int open64(const char *n, int f, ...) { return open(n, f); }
 int close(int fd) { if (fd < 3 || !fdtab[fd]) return -1; Close(fdtab[fd]); fdtab[fd] = 0; return 0; }
-int read(int fd, void *b, unsigned n) { return Read(fdtab[fd], b, n); }
-int write(int fd, const void *b, unsigned n) { if (fd < 3) return n; return Write(fdtab[fd], b, n); }
-long lseek(int fd, long off, int whence) { long old = Seek(fdtab[fd], 0, OFFSET_CURRENT); if (old < 0) return -1; if (Seek(fdtab[fd], off, whence == 0 ? OFFSET_BEGINNING : whence == 1 ? OFFSET_CURRENT : OFFSET_END) < 0) return -1; return Seek(fdtab[fd], 0, OFFSET_CURRENT); }
+int read(int fd, void *b, unsigned n) { LONG r = Read(fdtab[fd], b, n); if (r > 0) fdpos[fd] += r; return r; }
+int write(int fd, const void *b, unsigned n) { if (fd < 3) return n; LONG r = Write(fdtab[fd], b, n); if (r > 0) { fdpos[fd] += r; if (fdsize[fd] >= 0 && fdpos[fd] > fdsize[fd]) fdsize[fd] = fdpos[fd]; } return r; }
+static long fd_size(int fd)
+{
+	if (fdsize[fd] < 0) { Seek(fdtab[fd], 0, OFFSET_END); fdsize[fd] = Seek(fdtab[fd], fdpos[fd], OFFSET_BEGINNING); /* returns the end position */ }
+	return fdsize[fd];
+}
+long lseek(int fd, long off, int whence)
+{
+	long np = whence == 0 ? off : whence == 1 ? fdpos[fd] + off : fd_size(fd) + off;
+	if (np < 0) return -1;
+	if (np != fdpos[fd]) { if (Seek(fdtab[fd], np, OFFSET_BEGINNING) < 0) return -1; fdpos[fd] = np; }
+	return np;
+}
 long long lseek64(int fd, long long off, int whence) { return lseek(fd, (long)off, whence); }
-long filelength(int fd) { long cur = lseek(fd, 0, 1); long end = lseek(fd, 0, 2); lseek(fd, cur, 0); return end; }
+long filelength(int fd) { return fd_size(fd); }
 int access(const char *name, int mode) { LONG fh = Open(name, MODE_OLDFILE); if (!fh) return -1; Close(fh); return 0; }
 int remove(const char *name) { register void *a6 __asm("a6") = DOSBase; register ULONG d1 __asm("d1") = (ULONG)name; register LONG d0 __asm("d0"); __asm volatile("jsr -72(%%a6)" : "=r"(d0), "+r"(d1) : "r"(a6) : "a0", "a1", "memory", "cc"); return d0 ? 0 : -1; }
 char *getenv(const char *n)

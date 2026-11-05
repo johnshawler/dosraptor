@@ -134,3 +134,37 @@ for fn in ('ptrapi.h','ptrapi.c','kbdapi.h','kbdapi.c'):
 PY
 sed -i 's/((volatile)\([A-Za-z_0-9]*\))/(\1)/g; s/!(volatile)not_in_update/!not_in_update/; s/(volatile) *KBD_Key/KBD_Key/' ptrapi.h ptrapi.c swdapi.c
 cd ../..
+cd build/src
+python3 - <<'PY'
+s=open('rap.c').read()
+s=s.replace("#define MAX_HMEM   ( 4096 * 1024 )","#define MAX_HMEM   ( 4608 * 1024 )   /* 8 MB fast RAM target: VM heap */")
+open('rap.c','w').write(s)
+g=open('glbapi.c').read()
+a=g.index("GLB_DeCrypt(\nCHAR    *key,"); b=g.index("\n}\n",a)+3
+g=g[:a]+"""GLB_DeCrypt(
+CHAR    *key,               // INPUT : Key that will allow Decryption
+BYTE    *buffer,            // INPUT : Buffer to Encrypt
+size_t  length              // INPUT : Length of Buffer
+)
+{
+   INT   klen = strlen( key );
+   INT   prev_byte;
+   INT   kidx;
+   const BYTE *k = ( const BYTE * )key;
+   BYTE *p = buffer;
+
+   kidx = SEED % klen;
+   prev_byte = k[ kidx ];
+   while ( length-- )
+   {
+      INT b = *p;
+      *p++ = ( BYTE )( b - k[ kidx ] - prev_byte );
+      prev_byte = b;
+      if ( ++kidx >= klen )
+         kidx = 0;
+   }
+}
+"""+g[b:]
+open('glbapi.c','w').write(g)
+PY
+cd ../..

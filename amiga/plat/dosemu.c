@@ -67,6 +67,7 @@ void plat_mouse_resend(void) { if (ev_repeat > 0 && mouse_handler) { ev_repeat--
 /* ---- DPMI memory ---- */
 int _dpmi_dosalloc(unsigned short paras, unsigned int *segment)
 {
+	if (paras > 4096) return 8;            /* no "low memory" pool: the 8 MB of fast RAM go to the game's VM heap instead */
 	void *p = AllocMem((unsigned)paras * 16 + 16, MEMF_CLEAR);
 	if (!p) return 8;
 	*segment = (((unsigned)p + 15) & ~15u) >> 4;
@@ -78,5 +79,5 @@ int _dpmi_getmemsize(void)
 {
 	unsigned avail = AvailMem(MEMF_FAST | MEMF_LARGEST);
 	if (!avail) avail = AvailMem(MEMF_ANY | MEMF_LARGEST);
-	return avail > 0x700000 ? 0x700000 : avail;
+	return avail > 0x780000 ? 0x780000 : avail;
 }
