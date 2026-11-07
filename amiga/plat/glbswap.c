@@ -83,6 +83,12 @@ static void swap_itm(const char *name, BYTE *p, unsigned size)
 	}
 }
 
+static void swap_rec(BYTE *p, unsigned size)
+{
+	/* demo recording: RECORD {BYTE b1..b4; SHORT px, py, playerpic, fil} = 12 bytes */
+	for (unsigned o = 0; o + 12 <= size; o += 12) { sw16(p + o + 4); sw16(p + o + 6); sw16(p + o + 8); sw16(p + o + 10); }
+}
+
 void GLB_SwapItem(const char *rawname, BYTE *p, unsigned size)
 {
 	char name[17]; int i;
@@ -92,6 +98,7 @@ void GLB_SwapItem(const char *rawname, BYTE *p, unsigned size)
 	for (int k = 0; k < i; k++) if (name[k] == '_') suf = name + k + 1;
 	if (suf && (!strcmp3(suf, "PIC") || !strcmp3(suf, "BLK"))) { swap_pic(p, size); return; }
 	if (suf && !strcmp3(suf, "FNT")) { swap_fnt(p, size); return; }
+	if (suf && !strcmp3(suf, "REC")) { swap_rec(p, size); return; }
 	if (suf && !strcmp3(suf, "MAP")) { swap_map(p, size); return; }
 	if (suf && !strcmp3(suf, "ITM")) { swap_itm(name, p, size); return; }
 	if (suf && !strcmp3(suf, "AGX")) { swap_agx(p, size); return; }

@@ -30,8 +30,10 @@ static int sc_of(char c)
 }
 void inject_init(void)
 {
+	extern int plat_debug_log;
 	LONG fh = Open("SYS:inject.txt", MODE_OLDFILE);
 	if (!fh) return;
+	plat_debug_log = 1;
 	char *buf = malloc(16384); int n = Read(fh, buf, 16383); Close(fh);
 	if (n <= 0) return; buf[n] = 0;
 	char *p = buf;

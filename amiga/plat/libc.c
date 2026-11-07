@@ -237,9 +237,11 @@ void isr_log(const char *f, ...)
 int dbgfd;
 extern void inject_log(const char *s);
 void dbg_flush(void);
+int plat_debug_log;                     /* set when SYS:inject.txt exists (test runs); release disks never write a log */
 void dbg_write(const char *s)
 {
 	inject_log(s);
+	if (!plat_debug_log) return;
 	if (!dbgfd) { LONG fh = Open("SYS:dbg.log", MODE_NEWFILE); dbgfd = fh ? fh : -1; }
 	if (dbgfd > 0) { extern volatile unsigned plat_vbl_count; char pre[16]; int n = sprintf(pre, "[%u] ", plat_vbl_count); Write(dbgfd, pre, n); Write(dbgfd, s, strlen(s)); }
 }
