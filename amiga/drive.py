@@ -35,8 +35,7 @@ fullscreen = 0
 {'' if os.environ.get('ACC') == 'default' else 'accuracy = ' + os.environ.get('ACC', '-1')}
 console_debugger = 1
 {'' if os.environ.get('CPUSPEED') == 'default' else 'cpu_speed = ' + os.environ.get('CPUSPEED', 'max')}
-joystick_port_0 = none
-joystick_port_1 = none
+{'' if os.environ.get('JOY') == 'default' else 'joystick_port_0 = none' + chr(10) + 'joystick_port_1 = none'}
 ''')
 xv = subprocess.Popen('Xvfb :96 -screen 0 800x600x24', shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 for _ in range(30):
@@ -62,6 +61,8 @@ try:
             while not re.search(pat, log()) and time.time() < end: time.sleep(1)
             print('%5.0fs wait %s -> %s' % (time.time() - t0, pat, 'ok' if re.search(pat, log()) else 'TIMEOUT'))
         elif cmd == 'key': sh(f'xdotool key --delay 120 {arg}')
+        elif cmd == 'keydown': sh(f'xdotool keydown {arg}')
+        elif cmd == 'keyup': sh(f'xdotool keyup {arg}')
         elif cmd == 'keys': sh(f'xdotool type --delay 150 "{arg}"')
         elif cmd == 'click': sh('xdotool click 1')
         elif cmd == 'mrel': sh(f'xdotool mousemove_relative -- {arg}')

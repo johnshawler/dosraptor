@@ -88,6 +88,13 @@ cd ../..
 cd build/src
 python3 - <<'PY'
 import re
+s=open('input.c').read()
+for k,d in (('k_Up',0),('k_Down',1),('k_Left',2),('k_Right',3)):
+    s=s.replace('KBD_Key ( %s )'%k,'( KBD_Key ( %s ) || plat_joy_dir ( %d ) )'%(k,d))
+for k,b in (('k_Fire',1),('k_FireSp',2)):
+    s=s.replace('KBD_Key ( %s )'%k,'( KBD_Key ( %s ) || plat_joy_btn ( %d ) )'%(k,b))
+s='int plat_joy_dir(int);\nint plat_joy_btn(int);\n'+s
+open('input.c','w').write(s)
 def mark(fn, func, tag):
     s=open(fn).read()
     pat=re.compile(r'(\n'+func+r'\s*\([^)]*\)\s*\{)')

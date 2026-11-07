@@ -135,3 +135,20 @@ void PTR_ReadJoyStick(void)
 	joy_x = right ? 40 : left ? -40 : 0; joy_y = down ? 40 : up ? -40 : 0;
 	joy_buttons = ((*ciaa & 0x80) ? 0 : 1) | ((*potgor & 0x4000) ? 0 : 2);
 }
+
+/* Amiga joystick (port 2) as an alternative to the arrow keys / fire keys: FS-UAE maps the cursor keys to a virtual joystick by default */
+int plat_joy_dir(int d)
+{
+	unsigned j = *(volatile unsigned short *)0xDFF00C;
+	switch (d) {
+	case 0: return ((j >> 9) ^ (j >> 8)) & 1;      /* up */
+	case 1: return ((j >> 1) ^ j) & 1;             /* down */
+	case 2: return (j >> 9) & 1;                   /* left */
+	default: return (j >> 1) & 1;                  /* right */
+	}
+}
+int plat_joy_btn(int b)
+{
+	if (b == 1) return !(*(volatile unsigned char *)0xBFE001 & 0x80);
+	return !(*(volatile unsigned short *)0xDFF016 & 0x4000);
+}
