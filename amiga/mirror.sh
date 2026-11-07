@@ -112,6 +112,11 @@ mark('windows.c','WIN_LoadComp','LOADCOMP')
 mark('windows.c','WIN_MainLoop','MAINLOOP')
 mark('loadsave.c','RAP_LoadMap','LOADMAP')
 mark('rap.c','Do_Game','GAME')
+mark('input.c','DEMO_Play','DEMOPLAY')
+mark('input.c','DEMO_LoadFile','DEMOLOAD')
+mark('intro.c','INTRO_Credits','CREDITS')
+mark('intro.c','INTRO_PlayMain','PLAYMAIN')
+mark('windows.c','WIN_MainMenu','MAINMENU')
 PY
 cd ../..
 cd build/src

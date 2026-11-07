@@ -34,12 +34,12 @@ int memcmp(const void *a, const void *b, size_t n)
 	for (; n; n--, x++, y++) if (*x != *y) return *x - *y;
 	return 0;
 }
-size_t strlen(const char *s) { const char *p = s; while (*p) p++; return p - s; }
+size_t strlen(const char *s) { if (!s) return 0; const char *p = s; while (*p) p++; return p - s; }
 char *strcpy(char *d, const char *s) { char *r = d; while ((*d++ = *s++)); return r; }
 char *strncpy(char *d, const char *s, size_t n) { char *r = d; while (n && (*d++ = *s++)) n--; while (n-- > 1) *d++ = 0; return r; }
 char *strcat(char *d, const char *s) { strcpy(d + strlen(d), s); return d; }
 char *strncat(char *d, const char *s, size_t n) { char *r = d; d += strlen(d); while (n-- && (*d = *s++)) d++; *d = 0; return r; }
-int strcmp(const char *a, const char *b) { while (*a && *a == *b) a++, b++; return (unsigned char)*a - (unsigned char)*b; }
+int strcmp(const char *a, const char *b) { if (!a) a = ""; if (!b) b = ""; while (*a && *a == *b) a++, b++; return (unsigned char)*a - (unsigned char)*b; }
 int strncmp(const char *a, const char *b, size_t n) { while (n && *a && *a == *b) a++, b++, n--; return n ? (unsigned char)*a - (unsigned char)*b : 0; }
 int toupper(int c) { return (c >= 'a' && c <= 'z') ? c - 32 : c; }
 int tolower(int c) { return (c >= 'A' && c <= 'Z') ? c + 32 : c; }
@@ -50,7 +50,7 @@ int isspace(int c) { return c == ' ' || (c >= 9 && c <= 13); }
 int isupper(int c) { return c >= 'A' && c <= 'Z'; }
 int islower(int c) { return c >= 'a' && c <= 'z'; }
 int isprint(int c) { return c >= 32 && c < 127; }
-int stricmp(const char *a, const char *b) { while (*a && tolower(*a) == tolower(*b)) a++, b++; return tolower((unsigned char)*a) - tolower((unsigned char)*b); }
+int stricmp(const char *a, const char *b) { if (!a) a = ""; if (!b) b = ""; while (*a && tolower(*a) == tolower(*b)) a++, b++; return tolower((unsigned char)*a) - tolower((unsigned char)*b); }
 int strcmpi(const char *a, const char *b) { return stricmp(a, b); }
 int strnicmp(const char *a, const char *b, size_t n) { while (n && *a && tolower(*a) == tolower(*b)) a++, b++, n--; return n ? tolower((unsigned char)*a) - tolower((unsigned char)*b) : 0; }
 char *strupr(char *s) { for (char *p = s; *p; p++) *p = toupper(*p); return s; }
@@ -199,6 +199,7 @@ char *getenv(const char *n)
 #ifdef GODMODE
 	if (!strcmp(n, "S_HOST")) return "CASTLE";   /* test builds: invulnerable ship */
 #endif
+	if (!strcmp(n, "S_HOST")) return "";      /* main() compares it without a NULL check */
 	return NULL;
 }
 int chsize(int fd, long sz) { return 0; }
