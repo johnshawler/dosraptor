@@ -87,7 +87,7 @@ PY
 cd ../..
 cd build/src
 python3 - <<'PY'
-import re
+import re, os
 s=open('input.c').read()
 for k,d in (('k_Up',0),('k_Down',1),('k_Left',2),('k_Right',3)):
     s=s.replace('KBD_Key ( %s )'%k,'( KBD_Key ( %s ) || plat_joy_dir ( %d ) )'%(k,d))
@@ -125,6 +125,10 @@ s=open('imsapi.c').read()
 s=s.replace("   loop = 100;\n   while (IMS_IsAck())\n      loop--;","   loop = 100;\n   { long spin = 0; while (IMS_IsAck()) { loop--; plat_idle(); if ( ++spin > 200000L ) { { int i; PTR_B1 = 0; mouseb2 = 0; mouseb3 = 0; for ( i = 0; i < 128; i++ ) keyboard[i] = 0; KBD_LASTSCAN = 0; } break; } } }",1)
 s="void plat_idle(void);\n"+s
 open('imsapi.c','w').write(s)
+if os.environ.get('TESTLAND'):
+    s=open('rap.c').read()
+    s=s.replace("      gl_cnt++;\n\n      TILE_Think();","      { static int tl; if ( ++tl == 300 && startendwave == EMPTY ) startendwave = END_DURATION; }\n      gl_cnt++;\n\n      TILE_Think();",1)
+    open('rap.c','w').write(s)
 mark('store.c','STORE_Enter','STORE')
 mark('windows.c','WIN_Hangar','HANGAR')
 mark('windows.c','WIN_ShipComp','SHIPCOMP')
