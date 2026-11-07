@@ -24,6 +24,7 @@ amiga_model = A1200
 kickstart_file = {KICK}
 fast_memory = 8192
 {'cpu = 68030' if os.environ.get('CPU') == '030' else ''}
+{os.environ.get('EXTRACFG', '').replace(';', chr(10))}
 hard_drive_0 = {W}/hd
 hard_drive_0_label = SYS
 window_width = 640

@@ -47,27 +47,53 @@ void plat_mouse_poll(void)
 	int b = ((*(volatile unsigned char *)0xBFE001 & 0x40) ? 0 : 1) | ((R16(0x016) & 0x400) ? 0 : 2) | ((R16(0x016) & 0x100) ? 0 : 4);
 	if (dx || dy || b != mouse_btn) { mouse_btn = b; plat_mouse_event(mouse_btn, mouse_x, mouse_y); }
 }
+/* Palette loading goes through the Copper: the hardware executes the colour writes at a fixed time at the top of the frame, so a late
+   vertical-blank interrupt (the audio interrupt has a higher priority) can no longer spill colour writes into the visible picture, and
+   the CPU never fights the Copper over BPLCON3 (colour bank / LOCT select). */
+static unsigned short *cop_pal;                 /* palette + base list */
+static int pal_frames;
+static unsigned short *build_base(unsigned short *p, int vs, int ve, unsigned char *nullspr);
+static int g_vs, g_ve; static unsigned char *g_nullspr;
 void plat_vbl_hw(void)
 {
 	if (!active) return;
 	if (pal_dirty) {
 		pal_dirty = 0;
+		unsigned short *p = cop_pal;
 		for (int bank = 0; bank < 8; bank++) {
 			for (int pass = 0; pass < 2; pass++) {
-				R16(0x106) = 0x0C20 | (bank << 13) | (pass ? 0x200 : 0);
+				*p++ = 0x106; *p++ = 0x0C20 | (bank << 13) | (pass ? 0x200 : 0);
 				for (int k = 0; k < 32; k++) {
 					unsigned c = pal24[bank * 32 + k];
 					unsigned r = (c >> 16) & 255, g = (c >> 8) & 255, bb = c & 255;
 					unsigned v = pass ? (((r & 15) << 8) | ((g & 15) << 4) | (bb & 15)) : (((r >> 4) << 8) | ((g >> 4) << 4) | (bb >> 4));
-					R16(0x180 + k * 2) = v;
+					*p++ = 0x180 + k * 2; *p++ = v;
 				}
 			}
 		}
-		R16(0x106) = 0x0C20;
+		*p++ = 0x106; *p++ = 0x0C20;
+		p = build_base(p, g_vs, g_ve, g_nullspr);
+		*p++ = 0xFFFF; *p++ = 0xFFFE;
+		R16(0x080) = (unsigned)cop_pal >> 16; R16(0x082) = (unsigned)cop_pal & 0xffff;
+		pal_frames = 2;
+	} else if (pal_frames && --pal_frames == 0) {
+		R16(0x080) = (unsigned)cop >> 16; R16(0x082) = (unsigned)cop & 0xffff;
 	}
 }
 
 static unsigned short *cadd(unsigned short *p, int reg, int val) { *p++ = reg; *p++ = val; return p; }
+static unsigned short *build_base(unsigned short *p, int vs, int ve, unsigned char *nullspr)
+{
+	p = cadd(p, 0x1FC, 0x0001);                    /* FMODE: 32-bit bitplane fetch */
+	p = cadd(p, 0x100, 0x0211);                    /* BPLCON0: 8 planes, colour, ECSENA */
+	p = cadd(p, 0x102, 0); p = cadd(p, 0x104, 0x0024); p = cadd(p, 0x10C, 0x0011);
+	p = cadd(p, 0x08E, (vs << 8) | 0x81); p = cadd(p, 0x090, ((ve & 255) << 8) | 0xC1); p = cadd(p, 0x1E4, 0x2000 | ((ve > 255) ? 0x100 : 0));
+	p = cadd(p, 0x092, 0x0030); p = cadd(p, 0x094, 0x00C0);
+	p = cadd(p, 0x108, 280); p = cadd(p, 0x10A, 280);
+	for (int i = 0; i < 8; i++) { unsigned a = (unsigned)planes + i * 40; p = cadd(p, 0xE0 + i * 4, a >> 16); p = cadd(p, 0xE2 + i * 4, a & 0xffff); }
+	for (int i = 0; i < 8; i++) { unsigned a = (unsigned)nullspr; p = cadd(p, 0x120 + i * 4, a >> 16); p = cadd(p, 0x122 + i * 4, a & 0xffff); }
+	return p;
+}
 void plat_video_open(void)
 {
 	if (active) return;
@@ -83,19 +109,14 @@ void plat_video_open(void)
 	unsigned char *nullspr = AllocMem(16, MEMF_CHIP | MEMF_CLEAR);
 	int pal = ((unsigned char *)GfxBase)[206] & 4;
 	int vs = pal ? 0x48 : 0x2C, ve = vs + 200;
-	unsigned short *p = cop;
-	p = cadd(p, 0x1FC, 0x0001);                    /* FMODE: 32-bit bitplane fetch */
-	p = cadd(p, 0x100, 0x0211);                    /* BPLCON0: 8 planes, colour, ECSENA */
-	p = cadd(p, 0x102, 0); p = cadd(p, 0x104, 0x0024); p = cadd(p, 0x106, 0x0C20); p = cadd(p, 0x10C, 0x0011);
-	p = cadd(p, 0x08E, (vs << 8) | 0x81); p = cadd(p, 0x090, ((ve & 255) << 8) | 0xC1); p = cadd(p, 0x1E4, 0x2000 | ((ve > 255) ? 0x100 : 0));
-	p = cadd(p, 0x092, 0x0030); p = cadd(p, 0x094, 0x00C0);
-	p = cadd(p, 0x108, 280); p = cadd(p, 0x10A, 280);
-	for (int i = 0; i < 8; i++) { unsigned a = (unsigned)planes + i * 40; p = cadd(p, 0xE0 + i * 4, a >> 16); p = cadd(p, 0xE2 + i * 4, a & 0xffff); }
-	for (int i = 0; i < 8; i++) { unsigned a = (unsigned)nullspr; p = cadd(p, 0x120 + i * 4, a >> 16); p = cadd(p, 0x122 + i * 4, a & 0xffff); }
+	cop_pal = AllocMem(4096, MEMF_CHIP | MEMF_CLEAR);
+	g_vs = vs; g_ve = ve; g_nullspr = nullspr;
+	unsigned short *p = build_base(cop, vs, ve, nullspr);
 	*p++ = 0xFFFF; *p++ = 0xFFFE;
 	oldview = *(void **)((char *)GfxBase + 34);
 	LoadView(0); WaitTOF(); WaitTOF();
 	R16(0x096) = 0x0020;                           /* sprite DMA off */
+	R16(0x106) = 0x0C20;                           /* BPLCON3 once (the Copper no longer writes it every frame) */
 	R16(0x080) = (unsigned)cop >> 16; R16(0x082) = (unsigned)cop & 0xffff; R16(0x088) = 0;
 	R16(0x096) = 0x8000 | 0x0200 | 0x0100 | 0x0080;   /* DMAEN BPLEN COPEN */
 	active = 1; pal_dirty = 1;
