@@ -1,0 +1,69 @@
+wait WIN {MAIN_SWD}
+delay 400
+mouse 163 94
+delay 10
+click 1
+wait WIN {REGISTER_SWD}
+delay 150
+text john
+key 1c
+text ace
+key 1c
+wait WIN {ASKDIFF_SWD}
+delay 200
+mouse 174 56
+delay 80
+click 1
+wait STATE STORE
+delay 400
+key 1c
+delay 120
+key 1c
+delay 120
+key 1c
+delay 120
+key 1c
+delay 120
+key 1c
+delay 120
+key 1c
+delay 120
+key 1c
+delay 120
+key 1c
+delay 120
+key 1c
+delay 120
+key 1c
+delay 120
+key 1c
+delay 120
+key 1c
+delay 120
+key 4d
+delay 100
+key 1c
+delay 120
+key 1c
+delay 120
+key 1c
+delay 120
+key 1c
+delay 120
+key 1c
+delay 120
+key 1c
+delay 120
+key 01
+wait STATE HANGAR
+delay 300
+mouse 97 124
+delay 60
+click 1
+wait STATE SHIPCOMP
+delay 300
+mouse 162 42
+delay 20
+click 1
+wait STATE GAME
+delay 6000

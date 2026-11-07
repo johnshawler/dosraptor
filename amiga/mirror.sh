@@ -112,6 +112,19 @@ s="void plat_present_rect(int,int,int,int);\n"+s
 s=s.replace("   if ( not_in_update )\n   {\n      cur_mx = m_cx&0xffff;","   if ( MOUSE_TRACE && ( m_bx != mouseb1 ) ) isr_log(\"MOUSE b=%d x=%d y=%d niu=%d\\n\", m_bx, m_cx>>1, m_dx, not_in_update );\n   if ( not_in_update )\n   {\n      cur_mx = m_cx&0xffff;",1)
 s="void isr_log(const char *f, ...);\n#ifndef MOUSE_TRACE\n#define MOUSE_TRACE 0\n#endif\n"+s
 open('ptrapi.c','w').write(s)
+s=open('ptrapi.c').read()
+s=s.replace("      dm_x = cur_mx;\n      dm_y = cur_my;\n  \n      dm_x -= hot_mx;","      if ( cur_mx < 0 ) cur_mx = 0; if ( cur_mx > 319 ) cur_mx = 319;\n      if ( cur_my < 0 ) cur_my = 0; if ( cur_my > 199 ) cur_my = 199;\n      dm_x = cur_mx;\n      dm_y = cur_my;\n  \n      dm_x -= hot_mx;",1)
+s=s.replace("   while ( !(volatile)not_in_update );\n   not_in_update = FALSE;\n   mouseonhold = TRUE;","   { long spin = 0; while ( !not_in_update && ++spin < 2000000L ); }\n   not_in_update = FALSE;\n   mouseonhold = TRUE;",1)
+s=s.replace("   dm_x = cur_mx - hot_mx;\n   dm_y = cur_my - hot_my;\n   not_in_update = TRUE;","   if ( cur_mx < 0 ) cur_mx = 0; if ( cur_mx > 319 ) cur_mx = 319;\n   if ( cur_my < 0 ) cur_my = 0; if ( cur_my > 199 ) cur_my = 199;\n   dm_x = cur_mx - hot_mx;\n   dm_y = cur_my - hot_my;\n   not_in_update = TRUE;",1)
+open('ptrapi.c','w').write(s)
+s=open('kbdapi.c').read()
+s=s.replace("   for (;;)\n   {\n      if ( ! *ky )\n         break;\n   }","   { long spin = 0; for (;;)\n   {\n      if ( ! *ky )\n         break;\n      plat_idle();\n      if ( ++spin > 3000000L ) { *ky = 0; break; }\n   } }",1)
+s="void plat_idle(void);\n"+s
+open('kbdapi.c','w').write(s)
+s=open('imsapi.c').read()
+s=s.replace("   loop = 100;\n   while (IMS_IsAck())\n      loop--;","   loop = 100;\n   { long spin = 0; while (IMS_IsAck()) { loop--; plat_idle(); if ( ++spin > 200000L ) { { int i; PTR_B1 = 0; mouseb2 = 0; mouseb3 = 0; for ( i = 0; i < 128; i++ ) keyboard[i] = 0; KBD_LASTSCAN = 0; } break; } } }",1)
+s="void plat_idle(void);\n"+s
+open('imsapi.c','w').write(s)
 mark('store.c','STORE_Enter','STORE')
 mark('windows.c','WIN_Hangar','HANGAR')
 mark('windows.c','WIN_ShipComp','SHIPCOMP')
