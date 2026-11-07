@@ -5,6 +5,7 @@ OUT=${1:-build/raptor.hdf}; D=$(cd "$(dirname "$0")"; pwd); DATA=${RAPTOR_DATA:?
 rm -f "$OUT"; T=$(mktemp -d)
 sed "s/CardType=5/CardType=${CARD:-5}/; s/Volume=85/Volume=${VOL:-85}/" "$DATA/SETUP.INI" > $T/SETUP.INI
 V=$(git -C "$D" rev-parse --short HEAD 2>/dev/null || echo dev)
+sed -i "0,/^Fire=29/s//Fire=${FIREKEY:-30}/" $T/SETUP.INI   # keyboard fire: PC scan code 30 (0x1e) = the A key (was 29 = Ctrl)
 printf 'echo "Raptor A1200 build %s"\nraptor\n' "$V" > $T/startup-sequence
 python3 "$D/tools/mus2pcm.py" "$DATA" $T/music > /dev/null
 rdbtool "$OUT" create size=${SIZE:-40Mi} + init + add size=100% name=DH0 dostype=DOS1 bootable=True > /dev/null

@@ -15,6 +15,7 @@ shutil.rmtree(W, ignore_errors=True); os.makedirs(W + '/hd/S')
 for f in os.listdir(DATA):
     if f.upper().endswith('.GLB') or f.upper() == 'FILE_ID.DIZ': shutil.copy(os.path.join(DATA, f), W + '/hd/' + f)
 ini = open(DATA + '/SETUP.INI').read().replace('CardType=5', 'CardType=' + os.environ.get('CARD', '0')).replace('Volume=85', 'Volume=' + os.environ.get('VOL', '0'))
+if os.environ.get('FIREKEY'): ini = ini.replace('Fire=29', 'Fire=' + os.environ['FIREKEY'], 1)
 open(W + '/hd/SETUP.INI', 'w').write(ini)
 shutil.copy(os.environ.get('RAPTOR_BIN', D + '/build/raptor'), W + '/hd/raptor')
 if os.environ.get('MUSICDIR'): shutil.copytree(os.environ['MUSICDIR'], W + '/hd/MUSIC')
