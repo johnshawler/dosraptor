@@ -33,6 +33,7 @@ F = [
  ('Write','DOSBase',48,'LONG',[('LONG','fh','d1'),('const void *','buf','d2'),('LONG','len','d3')]),
  ('Seek','DOSBase',66,'LONG',[('LONG','fh','d1'),('LONG','pos','d2'),('LONG','mode','d3')]),
  ('DeleteFile','DOSBase',72,'LONG',[('const char *','name','d1')]),
+ ('Output','DOSBase',60,'LONG',[]),
  ('Delay','DOSBase',198,'void',[('ULONG','ticks','d1')]),
  ('OpenWindow','IntuitionBase',204,'void *',[('void *','nw','a0')]),
  ('CloseWindow','IntuitionBase',72,'void',[('void *','w','a0')]),

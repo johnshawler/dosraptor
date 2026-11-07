@@ -242,7 +242,11 @@ int plat_debug_log;                     /* set when SYS:inject.txt exists (test 
 void dbg_write(const char *s)
 {
 	inject_log(s);
-	if (!plat_debug_log) return;
+	if (!plat_debug_log) {                 /* release: messages go to the AmigaDOS console only (no disk writes) */
+		static LONG cons = -1; if (cons < 0) cons = Output();
+		if (cons && s[0]) Write(cons, s, strlen(s));
+		return;
+	}
 	if (!dbgfd) { LONG fh = Open("SYS:dbg.log", MODE_NEWFILE); dbgfd = fh ? fh : -1; }
 	if (dbgfd > 0) { extern volatile unsigned plat_vbl_count; char pre[16]; int n = sprintf(pre, "[%u] ", plat_vbl_count); Write(dbgfd, pre, n); Write(dbgfd, s, strlen(s)); }
 }
