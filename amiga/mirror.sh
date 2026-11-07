@@ -129,7 +129,7 @@ if os.environ.get('TESTLAND')=='2':
     s=open('rap.c').read()
     old="      TILE_Think();\n      ENEMY_Think();\n      ESHOT_Think();\n      BONUS_Think();\n      SHOTS_Think();\n      ANIMS_Think();\n      OBJS_Think();"
     assert old in s
-    new="      { int ff; extern BOOL end_waveflag; static int pe, ps; for ( ff = 0; ff < 6; ff++ ) {\n      TILE_Think();\n      ENEMY_Think();\n      ESHOT_Think();\n      BONUS_Think();\n      SHOTS_Think();\n      ANIMS_Think();\n      OBJS_Think(); }\n      if ( end_waveflag && !pe ) { pe = 1; printf(\"STATE ENDWAVEFLAG\\n\"); }\n      if ( startendwave != EMPTY && !ps ) { ps = 1; printf(\"STATE STARTENDWAVE\\n\"); } }"
+    new="      { int ff; extern BOOL end_waveflag; static int pe, ps; for ( ff = 0; ff < 6; ff++ ) {\n      TILE_Think();\n      ENEMY_Think();\n      ESHOT_Think();\n      BONUS_Think();\n      SHOTS_Think();\n      ANIMS_Think();\n      OBJS_Think(); }\n      if ( end_waveflag && startendwave == EMPTY ) { extern volatile BOOL keyboard[256]; keyboard[29] = 1; keyboard[30] = 1; }\n      if ( end_waveflag && !pe ) { pe = 1; printf(\"STATE ENDWAVEFLAG\\n\"); }\n      if ( startendwave != EMPTY && !ps ) { ps = 1; printf(\"STATE STARTENDWAVE\\n\"); } }"
     s=s.replace(old,new,1)
     open('rap.c','w').write(s)
 if os.environ.get('TESTLAND')=='1':
