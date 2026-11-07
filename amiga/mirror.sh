@@ -125,7 +125,14 @@ s=open('imsapi.c').read()
 s=s.replace("   loop = 100;\n   while (IMS_IsAck())\n      loop--;","   loop = 100;\n   { long spin = 0; while (IMS_IsAck()) { loop--; plat_idle(); if ( ++spin > 200000L ) { { int i; PTR_B1 = 0; mouseb2 = 0; mouseb3 = 0; for ( i = 0; i < 128; i++ ) keyboard[i] = 0; KBD_LASTSCAN = 0; } break; } } }",1)
 s="void plat_idle(void);\n"+s
 open('imsapi.c','w').write(s)
-if os.environ.get('TESTLAND'):
+if os.environ.get('TESTLAND')=='2':
+    s=open('rap.c').read()
+    old="      TILE_Think();\n      ENEMY_Think();\n      ESHOT_Think();\n      BONUS_Think();\n      SHOTS_Think();\n      ANIMS_Think();\n      OBJS_Think();"
+    assert old in s
+    new="      { int ff; extern BOOL end_waveflag; static int pe, ps; for ( ff = 0; ff < 6; ff++ ) {\n      TILE_Think();\n      ENEMY_Think();\n      ESHOT_Think();\n      BONUS_Think();\n      SHOTS_Think();\n      ANIMS_Think();\n      OBJS_Think(); }\n      if ( end_waveflag && !pe ) { pe = 1; printf(\"STATE ENDWAVEFLAG\\n\"); }\n      if ( startendwave != EMPTY && !ps ) { ps = 1; printf(\"STATE STARTENDWAVE\\n\"); } }"
+    s=s.replace(old,new,1)
+    open('rap.c','w').write(s)
+if os.environ.get('TESTLAND')=='1':
     s=open('rap.c').read()
     s=s.replace("      gl_cnt++;\n\n      TILE_Think();","      { static int tl; if ( ++tl == 300 && startendwave == EMPTY ) startendwave = END_DURATION; }\n      gl_cnt++;\n\n      TILE_Think();",1)
     open('rap.c','w').write(s)

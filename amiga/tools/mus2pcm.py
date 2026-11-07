@@ -143,7 +143,11 @@ if __name__ == '__main__':
             x = Player(g, None).play(b).astype(np.float64) / 32768.0
             pcm[name] = resample_poly(x, 1, RATE_OPL // RATE_OUT)
             print(name, '%.1fs' % (len(pcm[name]) / RATE_OUT), 'peak %.2f' % np.abs(pcm[name]).max())
-    peak = max(np.abs(v).max() for v in pcm.values()); gain = 0.9 / peak
+    # per-song loudness: remove DC, aim for the same RMS, never clip (a global gain left the quiet songs at 8-bit noise level)
+    for name, x in pcm.items():
+        x = x - x.mean(); rms = math.sqrt((x ** 2).mean()) or 1e-9; pk = np.abs(x).max() or 1e-9
+        g = min(0.20 / rms, 0.95 / pk); pcm[name] = x * g
+    gain = 1.0
     for name, x in pcm.items():
         out = np.clip(np.round(x * gain * 127), -128, 127).astype(np.int8)
         open(os.path.join(outdir, name[:-4] + '.PCM'), 'wb').write(out.tobytes())
