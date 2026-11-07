@@ -20,10 +20,10 @@ shutil.copy(os.environ.get('RAPTOR_BIN', D + '/build/raptor'), W + '/hd/raptor')
 if os.environ.get('MUSICDIR'): shutil.copytree(os.environ['MUSICDIR'], W + '/hd/MUSIC')
 if os.environ.get('INJECT'): shutil.copy(os.environ['INJECT'], W + '/hd/inject.txt'); open(W + '/hd/S/startup-sequence', 'w').write('raptor\n')
 open(W + '/test.fs-uae', 'w').write(f'''[fs-uae]
-amiga_model = A1200
+amiga_model = {os.environ.get('AMODEL', 'A1200')}
 kickstart_file = {KICK}
-fast_memory = 8192
-{'cpu = 68030' if os.environ.get('CPU') == '030' else ''}
+{'' if os.environ.get('AMODEL') else 'fast_memory = 8192'}
+{('cpu = 68030' if os.environ.get('CPU') == '030' else ('cpu = ' + os.environ['CPU'] if os.environ.get('CPU') else ''))}
 {os.environ.get('EXTRACFG', '').replace(';', chr(10))}
 hard_drive_0 = {W}/hd
 hard_drive_0_label = SYS
@@ -32,9 +32,9 @@ window_height = 512
 sound_output = 0
 automatic_input_grab = {os.environ.get('GRAB','1')}
 fullscreen = 0
-accuracy = {os.environ.get('ACC', '-1')}
+{'' if os.environ.get('ACC') == 'default' else 'accuracy = ' + os.environ.get('ACC', '-1')}
 console_debugger = 1
-cpu_speed = {os.environ.get('CPUSPEED', 'max')}
+{'' if os.environ.get('CPUSPEED') == 'default' else 'cpu_speed = ' + os.environ.get('CPUSPEED', 'max')}
 joystick_port_0 = none
 joystick_port_1 = none
 ''')
