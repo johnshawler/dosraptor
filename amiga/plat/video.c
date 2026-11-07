@@ -31,7 +31,7 @@ void plat_set_color(int i, int r6, int g6, int b6)
 	pal_dirty = 1;
 }
 /* called from the VBL interrupt (before the display window starts) */
-void plat_vbl_hw(void)
+void plat_mouse_poll(void)
 {
 	if (!active) return;
 	/* mouse */
@@ -46,6 +46,10 @@ void plat_vbl_hw(void)
 	}
 	int b = ((*(volatile unsigned char *)0xBFE001 & 0x40) ? 0 : 1) | ((R16(0x016) & 0x400) ? 0 : 2) | ((R16(0x016) & 0x100) ? 0 : 4);
 	if (dx || dy || b != mouse_btn) { mouse_btn = b; plat_mouse_event(mouse_btn, mouse_x, mouse_y); }
+}
+void plat_vbl_hw(void)
+{
+	if (!active) return;
 	if (pal_dirty) {
 		pal_dirty = 0;
 		for (int bank = 0; bank < 8; bank++) {
@@ -106,9 +110,23 @@ void plat_video_close(void)
 	if (window) { CloseWindow(window); window = 0; }
 }
 void dbg_flush(void);
+char dump_name[24]; volatile int dump_req;
+extern unsigned char dac[768];
+static void do_dump(void)
+{
+	char path[40]; int i = 0, k = 0; const char *pre = "SYS:";
+	while (pre[k]) path[i++] = pre[k++];
+	for (k = 0; dump_name[k]; k++) path[i++] = dump_name[k];
+	path[i++] = '.'; path[i++] = 'r'; path[i++] = 'a'; path[i++] = 'w'; path[i] = 0;
+	LONG fh = Open(path, MODE_NEWFILE);
+	if (fh) { Write(fh, plat_vram, 64000); Write(fh, dac, 768); Close(fh); }
+	dump_req = 0;
+}
+void plat_idle(void) { dbg_flush(); if (dump_req) do_dump(); }
 void plat_present(void)
 {
 	dbg_flush();
+	if (dump_req) do_dump();
 #ifdef FPS_TRACE
 	{ static unsigned n; extern volatile unsigned plat_vbl_count; if (++n % 100 == 0) { char b[40]; sprintf(b, "PRES %u\n", n); dbg_write(b); } }
 #endif
@@ -119,6 +137,18 @@ void plat_present(void)
 	const unsigned char *src = plat_vram; unsigned char *dst = planes;
 	static unsigned shadow[320 * 200 / 4];
 	c2p_frame(plat_vram, shadow, planes);
+}
+/* Convert only the 16-pixel groups that cover the rectangle (used for the mouse cursor, which the game draws straight into the screen
+   buffer from a timer service: waiting for the next full-screen update made the pointer lag badly on static screens). */
+void plat_present_rect(int x, int y, int w, int h)
+{
+	if (!active) return;
+	if (x < 0) { w += x; x = 0; } if (y < 0) { h += y; y = 0; }
+	if (x + w > 320) w = 320 - x; if (y + h > 200) h = 200 - y;
+	if (w <= 0 || h <= 0) return;
+	int g0 = x >> 4, g1 = (x + w - 1) >> 4;
+	for (int yy = y; yy < y + h; yy++)
+		for (int g = g0; g <= g1; g++) c2p_pair(plat_vram + yy * 320 + g * 16, planes + yy * 320 + g * 2);
 }
 void plat_mouse_set(int x, int y) { mouse_x = x; mouse_y = y; }
 

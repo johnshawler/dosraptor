@@ -4,7 +4,7 @@
 #include "../shim/dos.h"
 
 /* ---- VGA DAC ---- */
-static unsigned char dac[768];
+unsigned char dac[768];
 static int dac_w, dac_r, dac_wphase, dac_rphase;
 static unsigned retrace_last;
 static void (*mouse_handler)(int bx, int cx, int dx);

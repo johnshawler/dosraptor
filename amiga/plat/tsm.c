@@ -26,11 +26,13 @@ void tsm_vbl(void)
 	plat_vbl_count++;
 	plat_poll_input();
 	plat_vbl_hw();
+	if (!cia_ok) plat_mouse_poll();
 	inject_tick();
 	plat_mouse_resend();
 	if (!cia_ok) run_services(vbl_hz);
 }
-void tsm_cia(void) { run_services(base_hz); }
+extern void plat_mouse_poll(void);
+void tsm_cia(void) { plat_mouse_poll(); run_services(base_hz); }
 
 /* CIA-B timer interrupt through cia.resource (the OS owns the CIAs, so go through AddICRVector) */
 static struct __attribute__((packed)) { void *succ, *pred; unsigned char type, pri; char *name; void *data; void *code; } cis;

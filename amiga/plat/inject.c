@@ -19,6 +19,7 @@ static char *lines[MAXLINES]; static int nlines, cur;
 static int delay; static char waitpat[64]; static int waiting;
 static int pending_up = -1, up_delay, pend_btn_up, btn_delay, gap;
 static int mx = 160, my = 100;
+extern char dump_name[24]; extern volatile int dump_req;
 int inject_dbg[4];
 static const char ascmap[] = "\0\0" "1234567890" "\0\0\0\0" "qwertyuiop" "\0\0\0\0" "asdfghjkl" "\0\0\0\0\0" "zxcvbnm";
 static int sc_of(char c)
@@ -64,6 +65,7 @@ void inject_tick(void)
 		if (!strncmp(l, "key ", 4)) { int v = 0; for (const char *q = l + 4; *q; q++) { int d = (*q >= '0' && *q <= '9') ? *q - '0' : (*q >= 'a' && *q <= 'f') ? *q - 'a' + 10 : -1; if (d < 0) break; v = v * 16 + d; } KBD_ReadScan(v); pending_up = v; up_delay = 6; return; }
 		if (!strncmp(l, "text ", 5)) { ntype = typepos = 0; for (const char *q = l + 5; *q && ntype < 64; q++) { int sc = sc_of(*q); if (sc) typebuf[ntype++] = sc; } return; }
 		if (!strncmp(l, "mouse ", 6)) { const char *q = l + 6; mx = atoi(q); while (*q && *q != ' ') q++; my = atoi(q); plat_mouse_event(0, mx, my); plat_mouse_set(mx, my); inject_dbg[1]++; return; }
+		if (!strncmp(l, "dump ", 5)) { int k = 0; for (const char *q = l + 5; *q && k < 20; q++) dump_name[k++] = *q; dump_name[k] = 0; dump_req = 1; delay = 150; return; }
 		if (!strncmp(l, "click ", 6)) { int b = atoi(l + 6); plat_mouse_event(b, mx, my); pend_btn_up = 1; btn_delay = 15; return; }
 	}
 }
